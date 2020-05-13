@@ -135,8 +135,15 @@
       this.canvas = this.gameInstance.Module.canvas;
       this.resize();
       
-      this.ctx = this.gameInstance.Module.ctx;
       var thisXRMananger = this;
+      
+      this.ctx = this.gameInstance.Module.ctx;
+      this.ctx.bindFramebuffer = (oldBindFramebuffer => function bindFramebuffer(target, fbo) {
+        if (!fbo && thisXRMananger.vrSession && thisXRMananger.vrSession.renderState.baseLayer) {
+          fbo = thisXRMananger.vrSession.renderState.baseLayer.framebuffer;
+        }
+        return oldBindFramebuffer.call(this, target, fbo);
+      })(this.ctx.bindFramebuffer);
       this.gameInstance.Module.InternalBrowser.requestAnimationFrame = function (func) {
         if (!thisXRMananger.rAFCB) {
           thisXRMananger.rAFCB = func;
