@@ -192,10 +192,10 @@
       })
     );
     
-    navigator.xr.requestSession('inline').then((session) => {
+    /* navigator.xr.requestSession('inline').then((session) => {
       this.inlineSession = session;
       this.onSessionStarted(session);
-    });
+    }); */
   }
 
   XRManager.prototype.getGamepadAxes = function(gamepad) {
