@@ -231,25 +231,27 @@
       if (source.gripSpace && source.gamepad) {
         let sourcePose = frame.getPose(source.gripSpace, refSpace);
 
-        var position = sourcePose.transform.position;
-        var orientation = sourcePose.transform.orientation;
+        if (sourcePose) {
+          var position = sourcePose.transform.position;
+          var orientation = sourcePose.transform.orientation;
 
-        // Structure of this corresponds with WebXRControllerData.cs
-        gamepads.push({
-          id: source.gamepad.id,
-          index: source.gamepad.index,
-          hand: source.handedness,
-          buttons: this.getGamepadButtons(source.gamepad),
-          axes: this.getGamepadAxes(source.gamepad),
-          hasOrientation: true,
-          hasPosition: true,
-          orientation: this.GLQuaternionToUnity([orientation.x, orientation.y, orientation.z, orientation.w]),
-          position: this.GLVec3ToUnity([position.x, position.y, position.z]),
-          linearAcceleration: [0, 0, 0],
-          linearVelocity: [0, 0, 0]
-        });
+          // Structure of this corresponds with WebXRControllerData.cs
+          gamepads.push({
+            id: source.gamepad.id,
+            index: source.gamepad.index,
+            hand: source.handedness,
+            buttons: this.getGamepadButtons(source.gamepad),
+            axes: this.getGamepadAxes(source.gamepad),
+            hasOrientation: true,
+            hasPosition: true,
+            orientation: this.GLQuaternionToUnity([orientation.x, orientation.y, orientation.z, orientation.w]),
+            position: this.GLVec3ToUnity([position.x, position.y, position.z]),
+            linearAcceleration: [0, 0, 0],
+            linearVelocity: [0, 0, 0]
+          });
+        }
       }
-     }
+    }
     return gamepads;
   }
 
