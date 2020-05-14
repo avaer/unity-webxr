@@ -1,0 +1,26 @@
+{
+  "name": "unity-webxr",
+  "version": "0.0.2",
+  "description": "",
+  "main": "webxr.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/avaer/unity-webxr.git"
+  },
+  "author": "Avaer Kazmer <a@modules.io>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/avaer/unity-webxr/issues"
+  },
+  "homepage": "https://github.com/avaer/unity-webxr#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

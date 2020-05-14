@@ -135,8 +135,21 @@
       this.canvas = this.gameInstance.Module.canvas;
       this.resize();
       
-      this.ctx = this.gameInstance.Module.ctx;
       var thisXRMananger = this;
+      
+      this.ctx = this.gameInstance.Module.ctx;
+      this.ctx.bindFramebuffer = (oldBindFramebuffer => function bindFramebuffer(target, fbo) {
+        if (!fbo && thisXRMananger.vrSession && thisXRMananger.vrSession.renderState.baseLayer) {
+          fbo = thisXRMananger.vrSession.renderState.baseLayer.framebuffer;
+        }
+        return oldBindFramebuffer.call(this, target, fbo);
+      })(this.ctx.bindFramebuffer);
+      this.ctx._realClear = this.ctx.clear;
+      this.ctx.clear = function clear(bits) {
+        if (bits !== thisXRMananger.ctx.COLOR_BUFFER_BIT) {
+          return thisXRMananger.ctx._realClear.apply(this, arguments);
+        }
+      };
       this.gameInstance.Module.InternalBrowser.requestAnimationFrame = function (func) {
         if (!thisXRMananger.rAFCB) {
           thisXRMananger.rAFCB = func;
@@ -192,10 +205,10 @@
       })
     );
     
-    navigator.xr.requestSession('inline').then((session) => {
+    /* navigator.xr.requestSession('inline').then((session) => {
       this.inlineSession = session;
       this.onSessionStarted(session);
-    });
+    }); */
   }
 
   XRManager.prototype.getGamepadAxes = function(gamepad) {
@@ -224,25 +237,27 @@
       if (source.gripSpace && source.gamepad) {
         let sourcePose = frame.getPose(source.gripSpace, refSpace);
 
-        var position = sourcePose.transform.position;
-        var orientation = sourcePose.transform.orientation;
+        if (sourcePose) {
+          var position = sourcePose.transform.position;
+          var orientation = sourcePose.transform.orientation;
 
-        // Structure of this corresponds with WebXRControllerData.cs
-        gamepads.push({
-          id: source.gamepad.id,
-          index: source.gamepad.index,
-          hand: source.handedness,
-          buttons: this.getGamepadButtons(source.gamepad),
-          axes: this.getGamepadAxes(source.gamepad),
-          hasOrientation: true,
-          hasPosition: true,
-          orientation: this.GLQuaternionToUnity([orientation.x, orientation.y, orientation.z, orientation.w]),
-          position: this.GLVec3ToUnity([position.x, position.y, position.z]),
-          linearAcceleration: [0, 0, 0],
-          linearVelocity: [0, 0, 0]
-        });
+          // Structure of this corresponds with WebXRControllerData.cs
+          gamepads.push({
+            id: source.gamepad.id,
+            index: source.gamepad.index,
+            hand: source.handedness,
+            buttons: this.getGamepadButtons(source.gamepad),
+            axes: this.getGamepadAxes(source.gamepad),
+            hasOrientation: true,
+            hasPosition: true,
+            orientation: this.GLQuaternionToUnity([orientation.x, orientation.y, orientation.z, orientation.w]),
+            position: this.GLVec3ToUnity([position.x, position.y, position.z]),
+            linearAcceleration: [0, 0, 0],
+            linearVelocity: [0, 0, 0]
+          });
+        }
       }
-     }
+    }
     return gamepads;
   }
 
@@ -327,7 +342,8 @@
     this.canvas.height = glLayer.framebufferHeight;
 
     this.ctx.bindFramebuffer(this.ctx.FRAMEBUFFER, glLayer.framebuffer);
-    this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
+    this.ctx.clearColor(0, 0, 0, 0);
+    this.ctx._realClear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
     
     var xrData = this.xrData;
 
