@@ -144,6 +144,12 @@
         }
         return oldBindFramebuffer.call(this, target, fbo);
       })(this.ctx.bindFramebuffer);
+      this.ctx._realClear = this.ctx.clear;
+      this.ctx.clear = function clear(bits) {
+        if (bits !== thisXRMananger.ctx.COLOR_BUFFER_BIT) {
+          return thisXRMananger.ctx._realClear.apply(this, arguments);
+        }
+      };
       this.gameInstance.Module.InternalBrowser.requestAnimationFrame = function (func) {
         if (!thisXRMananger.rAFCB) {
           thisXRMananger.rAFCB = func;
@@ -336,7 +342,8 @@
     this.canvas.height = glLayer.framebufferHeight;
 
     this.ctx.bindFramebuffer(this.ctx.FRAMEBUFFER, glLayer.framebuffer);
-    this.ctx.clear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
+    this.ctx.clearColor(0, 0, 0, 0);
+    this.ctx._realClear(this.ctx.COLOR_BUFFER_BIT | this.ctx.DEPTH_BUFFER_BIT);
     
     var xrData = this.xrData;
 
